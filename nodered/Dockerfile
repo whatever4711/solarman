@@ -1,4 +1,8 @@
-FROM nodered/node-red-docker:slim
-
-RUN npm install --no-optional node-red-dashboard node-red-node-openweathermap bufferutil utf-8-validate
-
+FROM nodered/node-red:latest-minimal
+#USER root
+#RUN apk add -U --no-cache alpine-sdk python python3
+#USER node-red
+RUN npm install --no-optional node-red-contrib-prometheus-exporter \
+        node-red-node-openweathermap \
+        node-red-dashboard
+#RUN npm audit fix --force
