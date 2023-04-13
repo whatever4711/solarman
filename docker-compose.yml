@@ -1,5 +1,12 @@
 version: '3'
 
+# TODO Environment file for variables
+
+volumes:
+  influx_data:
+  nodered_data:
+  grafana_data:
+
 networks:
   mqtt:
 
@@ -13,7 +20,7 @@ services:
     networks:
       - mqtt
     volumes:
-      - ./nodered/data:/data
+      - nodered_data:/data
     ports:
       - 1880:1880
 
@@ -22,6 +29,9 @@ services:
     command: ["mosquitto", "-c", "/mosquitto-no-auth.conf"]
     networks:
       - mqtt
+    ports:
+      - 1883:1883
+# add Authentication configuration to mosquitto and mount it
 
   deye-mqtt:
     image: ghcr.io/kbialek/deye-inverter-mqtt
@@ -29,3 +39,33 @@ services:
       - config.env
     networks:
       - mqtt
+
+  influxdb:
+    image: influxdb:alpine
+    networks:
+      - mqtt
+    volumes:
+      - influx_data:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=admin_pwd
+      - DOCKER_INFLUXDB_INIT_ORG=skyhome.work
+      - DOCKER_INFLUXDB_INIT_BUCKET=deye
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=token_pwd
+# Seperate dockerfile to create additonal buckets needed !!! -> https://stackoverflow.com/questions/71854059/how-to-create-adittional-buckets-on-influxdb-docker-initialize
+# To generate additional bucket export INFLUX_ORG=skyhome.work and export INFLUX_TOKEN=token_pwd, then execute influx bucket create -n tasmota -o skyhome.work -r 0
+
+
+  grafana:
+    image: grafana/grafana-oss
+    networks:
+      - mqtt
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin_pwd
+      - GF_PATHS_PROVISIONING=/var/grafana-docker/provisioning
+    ports:
+      - 3000:3000
