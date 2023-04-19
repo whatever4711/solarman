@@ -4,6 +4,7 @@ FROM nodered/node-red:latest-minimal
 #USER node-red
 RUN npm install --no-optional node-red-contrib-prometheus-exporter \
         node-red-contrib-influxdb \
+        node-red-contrib-postgresql \
         node-red-contrib-tasmota \
         node-red-node-openweathermap \
         node-red-dashboard

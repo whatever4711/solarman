@@ -12,6 +12,7 @@ networks:
 
 services:
   nodered:
+    image: ghcr.io/whatever4711/solarman/nodered:latest
     depends_on:
       - mosquitto
     build:
